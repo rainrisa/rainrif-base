@@ -4,6 +4,7 @@ from pyrogram import Client
 from pyrogram.types import Message
 from pyrogram.enums import MessageEntityType
 from functions.get_inner_text import get_inner_text
+from rainrif_config import rainrif_config
 import re
 
 class Player():
@@ -27,6 +28,7 @@ class AstarothGame():
     self.last_live_rank_message_id = None
     self.round = 1
     self.chat_id = chat_id
+    self.display_chat_id = True
 
   def get_rank(self):
     return sorted(self.players, key = lambda id: self.players[id].total_bulls)
@@ -80,6 +82,9 @@ class AstarothGame():
   async def send_live_rank_message(self):
     if self.last_live_rank_message_id:
       await self.app.delete_messages(self.discussion_id, self.last_live_rank_message_id)
+      # Prevent last_message_id from being True if live_rank is False 
+      self.last_live_rank_message_id = None
+    if not rainrif_config.live_rank: return
     
     m = await self.app.send_message(
       chat_id = self.discussion_id, 
@@ -128,7 +133,7 @@ class AstarothGame():
       text += f"\n**{pro_number}.** `{player.name}` | `{player.total_bulls} sapi`\n"
 
     text += "\n"
-    text += "\nTidak Pro\n"
+    text += "\nNice Try\n"
 
     for player_id in nub_rank:
       nub_number += 1
@@ -142,7 +147,9 @@ class AstarothGame():
     self.played_numbers.sort()
     date_now = datetime.utcnow() + timedelta(hours=7)  # GMT7 Timezone
     date_after_format = date_now.strftime("%H:%M")
-    text = f"**Dark Fearst Live** `{self.chat_id}`\n\n"
+    text = f"**{rainrif_config.astaroth_live_title}**"
+    if self.display_chat_id: text += f" `{self.chat_id}`"
+    text += "\n\n"
     text += f"**Round {self.round}** | **List Kartu Yang Tersisa:**\n\n"
     text += "`"
     text += " ".join(map(str, self.unplayed_numbers))

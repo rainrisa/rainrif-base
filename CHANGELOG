@@ -7,3 +7,9 @@ v-2.0.0
 
 - live rank with total bulls
 - update ui
+
+v-3.0.0
+
+- toggle enable/disable between live rank
+- change live title with bot command /changetitle
+- fix cancel all tag
