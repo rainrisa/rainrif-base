@@ -27,7 +27,7 @@ astaroth_game: Dict[int, AstarothGame] = {}
 tags: Dict[int, Tag] = {}
 rainrif_config.sudo_users = list(map(int, getenv('SUDO_USERS').split()))
 
-@user_account.on_message(filters.command(["all", "tag"], ["#"]))
+@user_account.on_message(filters.command(["all", "tag"], ["."]))
 async def tag_handler(_, message):
   chat_id = message.chat.id
 
@@ -121,7 +121,7 @@ async def enable_rank_handler(_, message: Message):
 async def bot_regular_message_handler(_, message: Message):
   if message.chat.id == discussion_id and message.sender_chat:
     if message.sender_chat.type == ChatType.CHANNEL:
-      if message.text.find("Dark Fearst Live") != -1:
+      if message.text.find(rainrif_config.astaroth_live_title) != -1:
         chat_id = int(re.findall(r'-\d+', message.text)[0])
         astaroth_game[chat_id].discussion_message_id = message.id
         astaroth_game[chat_id].display_chat_id = False
