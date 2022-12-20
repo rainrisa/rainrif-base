@@ -16,12 +16,14 @@ class Tag():
     self.sleep_time = 5
     self.mention_at_a_time = 30
     self.tag_message_ids = []
+    self.cancel = False
 
   async def tag_all_users(self):
     for x in range(len(self.users)):
       self.waiting_list.append(self.users[x])
 
       if (len(self.waiting_list) >= self.mention_at_a_time):
+        if self.cancel: return
         await self.send_mention_message()
         self.waiting_list.clear()
         await sleep(self.sleep_time)

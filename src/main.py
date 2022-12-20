@@ -8,6 +8,7 @@ from os import getenv
 from astaroth_game import AstarothGame
 from tag import Tag
 from functions.get_payload import get_payload
+from rainrif_config import rainrif_config
 import re
 
 load_dotenv()
@@ -24,6 +25,7 @@ live_channel_id = int(getenv("LIVE_CHANNEL_ID"))
 discussion_id = int(getenv("DISCUSSION_ID"))
 astaroth_game: Dict[int, AstarothGame] = {}
 tags: Dict[int, Tag] = {}
+rainrif_config.sudo_users = list(map(int, getenv('SUDO_USERS').split()))
 
 @user_account.on_message(filters.command(["all", "tag"], ["#"]))
 async def tag_handler(_, message):
@@ -44,6 +46,7 @@ async def delete_mention_handler(_, message):
   chat_id = message.chat.id
 
   if chat_id in tags:
+    tags[chat_id].cancel = True
     await user_account.delete_messages(chat_id, message.id)
     await tags[chat_id].delete_all_tag_messages()
     del tags[chat_id]
@@ -102,13 +105,26 @@ async def regular_message_handler(_, message: Message):
 
     return
 
-@bot_account.on_message(filters.group)
+@bot_account.on_message(filters.private & filters.command("enablerank"))
+async def enable_rank_handler(_, message: Message):
+  await rainrif_config.enable_rank(message)
+
+@bot_account.on_message(filters.private & filters.command("disablerank"))
+async def enable_rank_handler(_, message: Message):
+  await rainrif_config.disable_rank(message)
+
+@bot_account.on_message(filters.private & filters.command("changetitle"))
+async def enable_rank_handler(_, message: Message):
+  await rainrif_config.change_title(message)
+
+@bot_account.on_message(filters.group & filters.text)
 async def bot_regular_message_handler(_, message: Message):
   if message.chat.id == discussion_id and message.sender_chat:
     if message.sender_chat.type == ChatType.CHANNEL:
-      if message.text and message.text.find("Dark Fearst Live") != -1:
+      if message.text.find("Dark Fearst Live") != -1:
         chat_id = int(re.findall(r'-\d+', message.text)[0])
         astaroth_game[chat_id].discussion_message_id = message.id
+        astaroth_game[chat_id].display_chat_id = False
 
   return
 
