@@ -28,13 +28,15 @@ tags: Dict[int, Tag] = {}
 rainrif_config.sudo_users = list(map(int, getenv('SUDO_USERS').split()))
 
 @user_account.on_message(filters.command(["all", "tag"], ["."]))
-async def tag_handler(_, message):
+async def tag_handler(_, message: Message):
   chat_id = message.chat.id
 
-  if chat_id in tags: return
-  if message.from_user.is_bot: return
+  try:
+    if message.from_user.is_bot: return
+  except: pass
   try: await user_account.delete_messages(message.chat.id, message.id)
   except: pass
+  if chat_id in tags: del tags[chat_id]
 
   tag_message = get_payload(message.text)
   tags[chat_id] = Tag(user_account, tag_message, chat_id)
