@@ -104,14 +104,22 @@ class AstarothGame():
     m = await self.app.send_message(self.live_channel_id, self.get_live_text())
     self.live_message_id = m.id
 
-  async def update_live_message(self):
-     await self.app.edit_message_text(self.live_channel_id,
-                                  self.live_message_id,
-                                  self.get_live_text())
+  async def update_live_message(self, finish = False):
+    if finish:
+      await self.app.edit_message_text(
+        self.live_channel_id,
+        self.live_message_id,
+        "Nice 🔥🔥")
+    else:
+      await self.app.edit_message_text(
+        self.live_channel_id,
+        self.live_message_id,
+        self.get_live_text())
 
   async def delete_live_message(self):
-    await self.app.delete_messages(self.live_channel_id,
-                                self.live_message_id)
+    await self.app.delete_messages(
+      self.live_channel_id,
+      self.live_message_id)
 
   def get_live_rank_text(self):
     rank_ids = self.get_rank()

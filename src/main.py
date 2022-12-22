@@ -100,6 +100,9 @@ async def regular_message_handler(_, message: Message):
       await astaroth_game[chat_id].update_live_message()
       
     elif message.text.find("Semua kartu telah digunakan!") != -1:
+      await astaroth_game[chat_id].update_live_message(finish = True)
+
+    elif message.text.find("Permainan berakhir!") != -1:
       await astaroth_game[chat_id].delete_live_message()
       del astaroth_game[chat_id]
 
