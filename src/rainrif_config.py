@@ -8,7 +8,7 @@ class RainrifConfig():
     self.disable_rank_sticker = "CAACAgUAAxkBAAELc5djnp5Cz6jGDliHJZGStZs5SZbM_QACVgEAAhYoyVU0QHA1a7IQySwE"
     self.success_sticker = "CAACAgUAAxkBAAELc5Vjnp2MTwmhBQuTvaaL0cR4Z1wNzwAC9AADkUfRVU1JUdBpoWNvLAQ"
     self.fail_sticker = "CAACAgUAAxkBAAELc7ZjnqogdFKM3NxrtQjs1A5K_GuwUwAC6AQAAvB1mFYmM6DD0xMNtCwE"
-    self.astaroth_live_title = "Dark Fearst Live"
+    self.astaroth_live_title = "Dark Fears"
     self.sudo_users = []
 
   async def enable_rank(self, message: Message):

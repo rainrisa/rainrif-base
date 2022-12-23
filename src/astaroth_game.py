@@ -109,7 +109,7 @@ class AstarothGame():
       await self.app.edit_message_text(
         self.live_channel_id,
         self.live_message_id,
-        "Nice 🔥🔥")
+        "Permainan berakhir!")
     else:
       await self.app.edit_message_text(
         self.live_channel_id,
@@ -123,7 +123,7 @@ class AstarothGame():
 
   def get_live_rank_text(self):
     rank_ids = self.get_rank()
-    text = f"{rainrif_config.astaroth_live_title} Podium Sementara\n"
+    text = f"**{rainrif_config.astaroth_live_title} Podium Sementara**\n"
     next_rank = 1
     last_player_bulls = 0
     text += f"\n**{next_rank}.** "
@@ -151,7 +151,6 @@ class AstarothGame():
           done = True
 
     text += f"**{last_player_bulls} sapi**"
-    text += "\n\n__*Tidak termasuk jumlah sapi pada saat Afk__"
 
     return text
 
