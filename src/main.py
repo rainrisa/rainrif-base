@@ -1,7 +1,9 @@
 from typing import Dict
 from pyrogram import Client, filters, idle
 from pyrogram.types import Message
+from pytgcalls.types.input_stream import InputStream, InputAudioStream
 from pyrogram.enums import ChatType
+from pytgcalls import PyTgCalls
 from dotenv import load_dotenv
 from asyncio import get_event_loop
 from os import getenv
@@ -19,6 +21,7 @@ string_session = getenv("USER_STRING_SESSION")
 bot_token = getenv("BOT_TOKEN")
 user_account = Client("rainrif_user", api_id=api_id, api_hash=api_hash, session_string=string_session)
 bot_account = Client("rainrif_bot", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
+call_account = PyTgCalls(user_account)
 loop = get_event_loop()
 astaroth_id = 2075925757
 live_channel_id = int(getenv("LIVE_CHANNEL_ID"))
@@ -28,13 +31,15 @@ tags: Dict[int, Tag] = {}
 rainrif_config.sudo_users = list(map(int, getenv('SUDO_USERS').split()))
 
 @user_account.on_message(filters.command(["all", "tag"], ["."]))
-async def tag_handler(_, message):
+async def tag_handler(_, message: Message):
   chat_id = message.chat.id
 
-  if chat_id in tags: return
-  if message.from_user.is_bot: return
+  try:
+    if message.from_user.is_bot: return
+  except: pass
   try: await user_account.delete_messages(message.chat.id, message.id)
   except: pass
+  if chat_id in tags: del tags[chat_id]
 
   tag_message = get_payload(message.text)
   tags[chat_id] = Tag(user_account, tag_message, chat_id)
@@ -50,6 +55,21 @@ async def delete_mention_handler(_, message):
     await user_account.delete_messages(chat_id, message.id)
     await tags[chat_id].delete_all_tag_messages()
     del tags[chat_id]
+
+@user_account.on_message(filters.group & filters.command("qq", ["/"]) & filters.me)
+async def delete_mention_handler(_, message: Message):
+  chat_id = message.chat.id
+  await user_account.delete_messages(chat_id, message.id)
+  try: await call_account.join_group_call(
+    chat_id, InputStream(InputAudioStream("src/audio.raw")))
+  except: pass
+
+@user_account.on_message(filters.group & filters.command("qqq", ["/"]) & filters.me)
+async def delete_mention_handler(_, message: Message):
+  chat_id = message.chat.id
+  await user_account.delete_messages(chat_id, message.id)
+  try: await call_account.leave_group_call(chat_id)
+  except: pass
 
 @user_account.on_message(filters.text & filters.bot)
 async def regular_message_handler(_, message: Message):
@@ -100,6 +120,9 @@ async def regular_message_handler(_, message: Message):
       await astaroth_game[chat_id].update_live_message()
       
     elif message.text.find("Semua kartu telah digunakan!") != -1:
+      await astaroth_game[chat_id].update_live_message(finish = True)
+
+    elif message.text.find("Permainan berakhir!") != -1:
       await astaroth_game[chat_id].delete_live_message()
       del astaroth_game[chat_id]
 
@@ -135,6 +158,7 @@ async def init():
   bot = await bot_account.get_me()
   print(f"App started as {user.first_name}")
   print(f"App started as {bot.username}")
+  await call_account.start()
   await idle()
 
 loop.run_until_complete(init())

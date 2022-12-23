@@ -18,3 +18,9 @@ v-4.0.0
 
 - fix live rank spam message
 - update ui
+
+v-5.0.0
+
+- more delay when deleting live message
+- fix timeout on tag handler
+- be able to join vidcall
