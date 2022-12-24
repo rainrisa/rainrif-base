@@ -25,7 +25,7 @@ class AstarothGame():
     self.discussion_message_id = None
     self.init_numbers_played = False
     self.players: Dict[int, Player] = {}
-    self.last_live_rank_message_id = None
+    self.live_rank_message_id = None
     self.round = 1
     self.chat_id = chat_id
     self.display_chat_id = True
@@ -80,18 +80,25 @@ class AstarothGame():
     self.round = number
 
   async def send_live_rank_message(self):
-    if self.last_live_rank_message_id:
-      await self.app.delete_messages(self.discussion_id, self.last_live_rank_message_id)
-      # Prevent last_message_id from being True if live_rank is False 
-      self.last_live_rank_message_id = None
-    if not rainrif_config.live_rank: return
-    
-    m = await self.app.send_message(
-      chat_id = self.discussion_id, 
-      text = self.get_live_rank_text(), 
-      reply_to_message_id = self.discussion_message_id)
-    
-    self.last_live_rank_message_id = m.id
+    if self.live_rank_message_id:
+      if rainrif_config.live_rank: 
+        try: await self.app.edit_message_text(
+          self.discussion_id, 
+          self.live_rank_message_id,
+          self.get_live_rank_text())
+        except: pass
+      else:
+        await self.app.delete_messages(self.discussion_id, self.live_rank_message_id)
+        self.live_rank_message_id = None
+    else:
+      if not rainrif_config.live_rank: return
+
+      m = await self.app.send_message(
+        chat_id = self.discussion_id, 
+        text = self.get_live_rank_text(), 
+        reply_to_message_id = self.discussion_message_id)
+
+      self.live_rank_message_id = m.id
 
   async def send_live_message(self):
     m = await self.app.send_message(self.live_channel_id, self.get_live_text())
@@ -108,38 +115,35 @@ class AstarothGame():
 
   def get_live_rank_text(self):
     rank_ids = self.get_rank()
-    total_players = len(self.players)
-    total_pro = 0
-    total_nub = 0
-    text = "**Dark Fearst Podium Sementara**\n"
-    
-    if total_players > 10:
-      total_pro = 5
-      total_nub = 5
-    else:
-      total_pro = int(total_players / 2)
-      total_nub = total_players - total_pro
-    
-    pro_rank = rank_ids[:total_pro]
-    nub_rank = rank_ids[-total_nub:]
-    pro_number = 0
-    nub_number = total_players - total_nub
+    text = f"{rainrif_config.astaroth_live_title} Podium Sementara\n"
+    next_rank = 1
+    last_player_bulls = 0
+    text += f"\n**{next_rank}.** "
+    row_count = 0
 
-    text += "\nPro\n"
-
-    for player_id in pro_rank:
-      pro_number += 1
+    for player_id in rank_ids:
       player = self.players[player_id]
-      text += f"\n**{pro_number}.** `{player.name}` | `{player.total_bulls} sapi`\n"
+      done = False
 
-    text += "\n"
-    text += "\nNice Try\n"
+      while not done:
+        if player.total_bulls != last_player_bulls:
+          past_player_bulls = last_player_bulls
+          last_player_bulls = player.total_bulls
 
-    for player_id in nub_rank:
-      nub_number += 1
-      player = self.players[player_id]
-      if player.total_bulls == 0: continue
-      text += f"\n**{nub_number}.** `{player.name}` | `{player.total_bulls} sapi`\n"
+          if row_count:
+            text += f"**{past_player_bulls} sapi**\n"
+            next_rank += 1
+            text += f"\n**{next_rank}.** "
+            text += f"`{player.name}` | "
+            row_count = 1
+            done = True
+        else:
+          text += f"`{player.name}` | "
+          row_count += 1
+          done = True
+
+    text += f"**{last_player_bulls} sapi**"
+    text += "\n\n__*Tidak termasuk jumlah sapi pada saat Afk__"
 
     return text
 

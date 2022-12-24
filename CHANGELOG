@@ -13,3 +13,8 @@ v-3.0.0
 - toggle enable/disable between live rank
 - change live title with bot command /changetitle
 - fix cancel all tag
+
+v-4.0.0
+
+- fix live rank spam message
+- update ui
